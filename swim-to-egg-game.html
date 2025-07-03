@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swim to the Egg - Nordiccell</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #ffeef8 0%, #ffe0f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 95%;
+            max-height: 600px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b9d, #0066cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .start-description {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .controls-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .power-up-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85em;
+        }
+
+        .legend-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.8em;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #0066cc, #0080ff);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+            height: 500px;
+            position: relative;
+        }
+
+        .game-header {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .score, .timer {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .score {
+            color: #0066cc;
+        }
+
+        .timer {
+            color: #ff6b9d;
+        }
+
+        /* Game Canvas */
+        #gameCanvas {
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            background: linear-gradient(90deg, #fff5f5 0%, #ffe0e0 100%);
+            display: block;
+            margin: 60px auto 0;
+            cursor: pointer;
+        }
+
+        /* Score Screen */
+        .score-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .final-score {
+            font-size: 3em;
+            background: linear-gradient(45deg, #ff6b9d, #0066cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .performance-message {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        /* Lead Form */
+        .lead-form {
+            background: #f8f9fa;
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-top: 15px;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: #00a651;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #00a651, #00d068);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.05em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 166, 81, 0.4);
+        }
+
+        /* Thank You Screen */
+        .thank-you {
+            display: none;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .thank-you h2 {
+            color: #00a651;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .thank-you p {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Egg illustration */
+        .egg-icon {
+            width: 60px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 20px rgba(255, 154, 158, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Mobile controls */
+        .mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 102, 204, 0.7);
+            border: 3px solid white;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-btn:active {
+            background: rgba(0, 102, 204, 0.9);
+            transform: scale(0.95);
+        }
+
+        .mobile-controls.hidden {
+            opacity: 0.3;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            .game-title {
+                font-size: 2em;
+            }
+            
+            .game-screen {
+                height: 400px;
+            }
+            
+            #gameCanvas {
+                margin-top: 50px;
+            }
+            
+            .score, .timer {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <div class="logo">NORDICCELL</div>
+            <h1 class="game-title">Swim to the Egg</h1>
+            <div class="egg-icon"></div>
+            <button class="btn" onclick="startGame()">Start Rejsen</button>
+            <p class="start-description">
+                Hjælp sædcellen med at nå ægget!<br>
+                Undgå forhindringer og saml power-ups undervejs.
+            </p>
+            <div class="controls-and-legend">
+                <div class="controls-info">
+                    <strong>Kontroller:</strong> Pil op/ned eller træk med fingeren (mobil)
+                </div>
+                <div class="power-up-legend">
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #ff4444;">■</div>
+                        <span>-1 point</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #0066cc;">N</div>
+                        <span>2 sek shield</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #00a651;">+</div>
+                        <span>+1 point</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-header">
+                <div class="score">Score: <span id="score">0</span></div>
+                <div class="timer">Tid: <span id="timer">30</span>s</div>
+            </div>
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Score Screen -->
+        <div class="score-screen" id="scoreScreen">
+            <h2 class="final-score">Score: <span id="finalScore">0</span></h2>
+            <p class="performance-message" id="performanceMessage"></p>
+            
+            <div class="lead-form" id="leadForm">
+                <button class="btn" onclick="playAgain()" style="background: linear-gradient(45deg, #ff6b9d, #0066cc); font-size: 0.95em; padding: 10px 30px; margin-bottom: 15px;">Prøv igen</button>
+                
+                <h3 class="form-title">Få vores IVF-produktguide</h3>
+                <p class="form-subtitle">+ Eksklusiv rabatkode!</p>
+                
+                <form id="leadCaptureForm">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="din@email.dk">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="industry">Branche *</label>
+                        <select id="industry" name="industry" required>
+                            <option value="">Vælg branche</option>
+                            <option value="IVF">IVF</option>
+                            <option value="GYN">GYN</option>
+                            <option value="VET">VET</option>
+                            <option value="Andet">Andet</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Få guide og rabat</button>
+                </form>
+            </div>
+            
+            <div class="thank-you" id="thankYou">
+                <div class="egg-icon"></div>
+                <h2>Tak for din interesse!</h2>
+                <p>Vi sender din IVF-produktguide og rabatkode til din email.</p>
+                <button class="btn" onclick="playAgain()">Spil igen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let canvas, ctx;
+        let score = 0;
+        let timeLeft = 30;
+        let gameRunning = false;
+        let gameInterval;
+        let animationId;
+        let collectedLeads = [];
+
+        // Player (sperm cell)
+        let player = {
+            x: 50,
+            y: 250,
+            radius: 15,
+            velocity: 0,
+            maxVelocity: 8,
+            speed: 3,
+            shielded: false,
+            shieldTimer: 0
+        };
+
+        // Game objects arrays
+        let obstacles = [];
+        let powerUps = [];
+        let particles = [];
+        
+        // Camera and world
+        let camera = { x: 0 };
+        let worldWidth = 3000;
+        let distanceTraveled = 0;
+
+        // Egg goal
+        let egg = {
+            x: 2900,
+            y: 250,
+            radius: 40
+        };
+
+        // Initialize canvas
+        function initCanvas() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            const container = document.querySelector('.game-screen');
+            canvas.width = Math.min(800, container.offsetWidth - 40);
+            canvas.height = 400;
+            
+            // Set egg position in world
+            egg.y = canvas.height / 2;
+        }
+
+        // Start game
+        function startGame() {
+            initCanvas();
+            resetGame();
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            gameRunning = true;
+            
+            // Start game timer
+            gameInterval = setInterval(updateTimer, 1000);
+            
+            // Setup controls
+            setupControls();
+            
+            // Start game loop
+            gameLoop();
+        }
+
+        // Reset game state
+        function resetGame() {
+            score = 0;
+            timeLeft = 30;
+            player.x = 50;
+            player.y = canvas.height / 2;
+            player.velocity = 0;
+            player.speed = 3;
+            player.shielded = false;
+            player.shieldTimer = 0;
+            camera.x = 0;
+            distanceTraveled = 0;
+            obstacles = [];
+            powerUps = [];
+            particles = [];
+            updateScore();
+            updateTimerDisplay();
+        }
+
+        // Setup controls
+        function setupControls() {
+            // Keyboard controls
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            
+            // Touch drag controls
+            canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+            canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+            canvas.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleKeyDown(e) {
+            if (!gameRunning) return;
+            if (e.key === 'ArrowUp') player.velocity = -player.maxVelocity;
+            if (e.key === 'ArrowDown') player.velocity = player.maxVelocity;
+        }
+
+        function handleKeyUp(e) {
+            if (!gameRunning) return;
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') player.velocity = 0;
+        }
+
+        function handleTouchStart(e) {
+            if (!gameRunning) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            lastTouchY = touch.clientY;
+            touchActive = true;
+            usingTouchDrag = true;
+        }
+
+        function handleTouchMove(e) {
+            if (!gameRunning || !touchActive) return;
+            e.preventDefault();
+            
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const canvasY = touch.clientY - rect.top;
+            
+            // Direct control - sperm follows finger position
+            const targetY = canvasY;
+            const currentY = player.y;
+            const diff = targetY - currentY;
+            
+            // Smooth movement towards finger
+            player.velocity = Math.max(-player.maxVelocity, Math.min(player.maxVelocity, diff * 0.2));
+            
+            lastTouchY = touch.clientY;
+        }
+
+        function handleTouchEnd(e) {
+            if (!gameRunning) return;
+            e.preventDefault();
+            touchActive = false;
+            player.velocity = 0;
+        }
+
+        function showMobileControls() {
+            const controls = document.getElementById('mobileControls');
+            if (controls) {
+                controls.classList.remove('hidden');
+                clearTimeout(mobileControlsTimer);
+            }
+        }
+
+        function hideMobileControls() {
+            const controls = document.getElementById('mobileControls');
+            if (controls && usingTouchDrag) {
+                controls.classList.add('hidden');
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(255, 240, 240, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update game objects
+            updatePlayer();
+            updateCamera();
+            updateObstacles();
+            updatePowerUps();
+            updateParticles();
+            
+            // Generate new objects
+            if (Math.random() < 0.03) generateObstacle();
+            if (Math.random() < 0.02) generatePowerUp();
+            if (Math.random() < 0.005) generateShieldPowerUp(); // Rare shield power-ups
+            
+            // Draw everything
+            drawBackground();
+            drawEgg();
+            drawPlayer();
+            drawObstacles();
+            drawPowerUps();
+            drawParticles();
+            drawProgress();
+            drawShieldTimer();
+            
+            // Check win condition
+            if (Math.abs(player.x - egg.x) < 50 && Math.abs(player.y - egg.y) < 50) {
+                winGame();
+                return;
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Update player position
+        function updatePlayer() {
+            // Update shield timer
+            if (player.shielded) {
+                player.shieldTimer--;
+                if (player.shieldTimer <= 0) {
+                    player.shielded = false;
+                }
+            }
+            
+            player.y += player.velocity;
+            
+            // Keep player in bounds
+            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+            
+            // Forward movement
+            player.x += player.speed;
+            distanceTraveled = player.x - 50;
+        }
+        
+        // Update camera to follow player
+        function updateCamera() {
+            camera.x = player.x - canvas.width / 3;
+            camera.x = Math.max(0, Math.min(worldWidth - canvas.width, camera.x));
+        }
+        
+        // Draw background
+        function drawBackground() {
+            // Distance markers
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.2)';
+            ctx.font = '20px Arial';
+            
+            for (let i = 500; i < worldWidth; i += 500) {
+                if (i > camera.x - 100 && i < camera.x + canvas.width + 100) {
+                    ctx.fillText(`${i}m`, i - camera.x, 30);
+                }
+            }
+            
+            // Background elements
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.1)';
+            for (let i = 0; i < 20; i++) {
+                const x = (i * 200 - camera.x * 0.5) % canvas.width;
+                ctx.beginPath();
+                ctx.arc(x, 100 + Math.sin(i) * 50, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Draw progress bar
+        function drawProgress() {
+            const progress = distanceTraveled / (egg.x - 50);
+            const barWidth = 200;
+            const barHeight = 10;
+            const barX = canvas.width - barWidth - 20;
+            const barY = 20;
+            
+            // Background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // Progress
+            ctx.fillStyle = '#00a651';
+            ctx.fillRect(barX, barY, barWidth * progress, barHeight);
+            
+            // Border
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(barX, barY, barWidth, barHeight);
+            
+            // Label
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText('Fremgang', barX - 60, barY + 8);
+        }
+
+        // Draw player (sperm cell)
+        function drawPlayer() {
+            const screenX = player.x - camera.x;
+            
+            // Draw shield if active
+            if (player.shielded) {
+                // Shield bubble
+                const gradient = ctx.createRadialGradient(screenX, player.y, 0, screenX, player.y, player.radius * 2.5);
+                gradient.addColorStop(0, 'rgba(0, 102, 204, 0.3)');
+                gradient.addColorStop(0.7, 'rgba(0, 102, 204, 0.2)');
+                gradient.addColorStop(1, 'rgba(0, 102, 204, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(screenX, player.y, player.radius * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Shield border
+                ctx.strokeStyle = '#0066cc';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(screenX, player.y, player.radius * 2, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Rotating Nordiccell "N" logos
+                ctx.save();
+                ctx.translate(screenX, player.y);
+                const rotation = Date.now() * 0.002;
+                for (let i = 0; i < 3; i++) {
+                    const angle = rotation + (i * Math.PI * 2 / 3);
+                    const x = Math.cos(angle) * (player.radius * 2);
+                    const y = Math.sin(angle) * (player.radius * 2);
+                    
+                    ctx.fillStyle = '#0066cc';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('N', x, y);
+                }
+                ctx.restore();
+            }
+            
+            // Main body
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = player.shielded ? '#0066cc' : '#0066cc';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(screenX, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Tail
+            ctx.strokeStyle = '#0066cc';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(screenX - player.radius, player.y);
+            for (let i = 0; i < 40; i++) {
+                const x = screenX - player.radius - i * 2;
+                const y = player.y + Math.sin(Date.now() * 0.01 + i * 0.3) * 10;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        // Draw egg
+        function drawEgg() {
+            const screenX = egg.x - camera.x;
+            if (screenX < -100 || screenX > canvas.width + 100) return;
+            
+            // Outer glow
+            const gradient = ctx.createRadialGradient(screenX, egg.y, 0, screenX, egg.y, egg.radius * 1.5);
+            gradient.addColorStop(0, 'rgba(255, 182, 193, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 182, 193, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(screenX, egg.y, egg.radius * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Main egg
+            ctx.fillStyle = '#ffb6c1';
+            ctx.strokeStyle = '#ff69b4';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(screenX, egg.y, egg.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Inner circle
+            ctx.fillStyle = '#ff69b4';
+            ctx.beginPath();
+            ctx.arc(screenX, egg.y, egg.radius * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Generate obstacles
+        function generateObstacle() {
+            obstacles.push({
+                x: camera.x + canvas.width + 50,
+                y: Math.random() * (canvas.height - 60) + 30,
+                width: 30,
+                height: 30
+            });
+        }
+
+        // Update obstacles
+        function updateObstacles() {
+            obstacles = obstacles.filter(obstacle => {
+                if (obstacle.x < camera.x - 200) return false;
+                
+                if (checkCollision(player, obstacle)) {
+                    if (player.shielded) {
+                        // Destroy obstacle when shielded
+                        createParticles(obstacle.x, obstacle.y, '#0066cc');
+                        return false;
+                    } else {
+                        score = Math.max(0, score - 1);
+                        updateScore();
+                        createParticles(obstacle.x, obstacle.y, '#ff0000');
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+        }
+
+        // Draw obstacles
+        function drawObstacles() {
+            ctx.fillStyle = '#ff4444';
+            ctx.strokeStyle = '#cc0000';
+            ctx.lineWidth = 2;
+            
+            obstacles.forEach(obstacle => {
+                const screenX = obstacle.x - camera.x;
+                if (screenX > -50 && screenX < canvas.width + 50) {
+                    ctx.fillRect(screenX, obstacle.y, obstacle.width, obstacle.height);
+                    ctx.strokeRect(screenX, obstacle.y, obstacle.width, obstacle.height);
+                }
+            });
+        }
+
+        // Generate power-ups
+        function generatePowerUp() {
+            powerUps.push({
+                x: camera.x + canvas.width + 50,
+                y: Math.random() * (canvas.height - 60) + 30,
+                radius: 15,
+                type: 'green' // Only green point power-ups here
+            });
+        }
+        
+        // Generate shield power-ups (rare)
+        function generateShieldPowerUp() {
+            powerUps.push({
+                x: camera.x + canvas.width + 50,
+                y: Math.random() * (canvas.height - 60) + 30,
+                radius: 20, // Slightly larger
+                type: 'blue'
+            });
+        }
+
+        // Update power-ups
+        function updatePowerUps() {
+            powerUps = powerUps.filter(powerUp => {
+                if (powerUp.x < camera.x - 200) return false;
+                
+                if (checkPowerUpCollision(player, powerUp)) {
+                    if (powerUp.type === 'blue') {
+                        // Shield power-up
+                        player.shielded = true;
+                        player.shieldTimer = 120; // 2 seconds at 60fps
+                    } else {
+                        // Green = Points
+                        score += 1;
+                        updateScore();
+                    }
+                    createParticles(powerUp.x, powerUp.y, powerUp.type === 'blue' ? '#0066cc' : '#00a651');
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+
+        // Draw power-ups
+        function drawPowerUps() {
+            powerUps.forEach(powerUp => {
+                const screenX = powerUp.x - camera.x;
+                if (screenX > -50 && screenX < canvas.width + 50) {
+                    if (powerUp.type === 'blue') {
+                        // Shield power-up with Nordiccell branding
+                        // Outer glow
+                        const glow = ctx.createRadialGradient(screenX, powerUp.y, 0, screenX, powerUp.y, powerUp.radius * 1.5);
+                        glow.addColorStop(0, 'rgba(0, 102, 204, 0.3)');
+                        glow.addColorStop(1, 'rgba(0, 102, 204, 0)');
+                        ctx.fillStyle = glow;
+                        ctx.beginPath();
+                        ctx.arc(screenX, powerUp.y, powerUp.radius * 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Main circle
+                        ctx.fillStyle = '#0066cc';
+                        ctx.strokeStyle = '#004499';
+                        ctx.lineWidth = 3;
+                        
+                        // Pulsing effect
+                        const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.15;
+                        ctx.save();
+                        ctx.translate(screenX, powerUp.y);
+                        ctx.scale(pulse, pulse);
+                        
+                        ctx.beginPath();
+                        ctx.arc(0, 0, powerUp.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        // Nordiccell "N" logo
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('N', 0, 0);
+                        
+                        ctx.restore();
+                    } else {
+                        // Green point power-up
+                        ctx.fillStyle = '#00a651';
+                        ctx.strokeStyle = '#007a3d';
+                        ctx.lineWidth = 2;
+                        
+                        // Pulsing effect
+                        const pulse = 1 + Math.sin(Date.now() * 0.005) * 0.1;
+                        ctx.save();
+                        ctx.translate(screenX, powerUp.y);
+                        ctx.scale(pulse, pulse);
+                        
+                        ctx.beginPath();
+                        ctx.arc(0, 0, powerUp.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        // Plus icon
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 14px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('+', 0, 0);
+                        
+                        ctx.restore();
+                    }
+                }
+            });
+        }
+
+        // Particle effects
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+
+        function updateParticles() {
+            particles = particles.filter(particle => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life -= 0.02;
+                return particle.life > 0;
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(particle => {
+                const screenX = particle.x - camera.x;
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.beginPath();
+                ctx.arc(screenX, particle.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        // Draw shield timer
+        function drawShieldTimer() {
+            if (player.shielded) {
+                const barWidth = 150;
+                const barHeight = 8;
+                const barX = 20;
+                const barY = canvas.height - 30;
+                
+                // Background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                // Shield time remaining
+                const remaining = player.shieldTimer / 120; // 120 frames = 2 seconds
+                ctx.fillStyle = '#0066cc';
+                ctx.fillRect(barX, barY, barWidth * remaining, barHeight);
+                
+                // Border
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(barX, barY, barWidth, barHeight);
+                
+                // Label
+                ctx.fillStyle = '#0066cc';
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText('SHIELD', barX, barY - 5);
+            }
+        }
+
+        // Collision detection
+        function checkCollision(player, obstacle) {
+            return player.x + player.radius > obstacle.x &&
+                   player.x - player.radius < obstacle.x + obstacle.width &&
+                   player.y + player.radius > obstacle.y &&
+                   player.y - player.radius < obstacle.y + obstacle.height;
+        }
+
+        function checkPowerUpCollision(player, powerUp) {
+            const dx = player.x - powerUp.x;
+            const dy = player.y - powerUp.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < player.radius + powerUp.radius;
+        }
+
+        // Update displays
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = timeLeft;
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            updateTimerDisplay();
+            
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        // Win game
+        function winGame() {
+            endGame();
+        }
+
+        // End game
+        function endGame() {
+            gameRunning = false;
+            clearInterval(gameInterval);
+            cancelAnimationFrame(animationId);
+            
+            // Show score screen
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('scoreScreen').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+            
+            // Performance message
+            let message = '';
+            if (score >= 20) {
+                message = 'Fantastisk! Du er en mester i fertilitet!';
+            } else if (score >= 10) {
+                message = 'Godt klaret! Du navigerede fint gennem udfordringerne.';
+            } else if (score >= 5) {
+                message = 'Ikke dårligt! Prøv igen for at forbedre din score.';
+            } else {
+                message = 'Det var svært! Øvelse gør mester.';
+            }
+            document.getElementById('performanceMessage').textContent = message;
+        }
+
+        // Lead capture form
+        document.getElementById('leadCaptureForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const lead = {
+                email: document.getElementById('email').value,
+                industry: document.getElementById('industry').value,
+                score: score,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Store lead data
+            collectedLeads.push(lead);
+            console.log('Lead captured:', lead);
+            console.log('All collected leads:', collectedLeads);
+            
+            // Show thank you message
+            document.getElementById('leadForm').style.display = 'none';
+            document.getElementById('thankYou').style.display = 'block';
+        });
+
+        // Play again
+        function playAgain() {
+            document.getElementById('scoreScreen').style.display = 'none';
+            document.getElementById('thankYou').style.display = 'none';
+            document.getElementById('leadForm').style.display = 'block';
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('leadCaptureForm').reset();
+            
+            if (canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (gameRunning && canvas) {
+                const container = document.querySelector('.game-screen');
+                canvas.width = Math.min(800, container.offsetWidth - 40);
+                canvas.height = 400;
+                egg.y = canvas.height / 2;
+            }
+        });
+    </script>
+</body>
+</html>
